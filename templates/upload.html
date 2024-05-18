@@ -1,18 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="shortcut icon" href="assets/img/favicon.png" type="image/x-icon">
     <link href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/js/all.min.js"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="{{url_for('static', filename='style.css')}}">
     <title>AI Potato</title>
 </head>
-
 <body>
     <header class="header" id="header">
         <nav class="nav container">
@@ -110,7 +107,7 @@
 
         <section class="steps section container" id="steps">
             <div class="steps__bg">
-                <div class="drag-area" ondrop="upload_file(event)" ondragover="return false">
+                <div class="drag-area" id="drag-area" ondrop="dropHandler(event)" ondragover="dragOverHandler(event)">
                     <div class="icon"><i class="fas fa-cloud-upload-alt"></i></div>
                     <header>Dosyayı Sürükleyip Bırakın veya Seçmek için Tıklayın</header>
                     <input type="file" name="file" id="file" onchange="file_browse(event)">
@@ -136,11 +133,12 @@
                     </div>
                 </div>
             </div>
-            <div class="aiButtons">
+            <div class="aiButtons" id="aiButtons">
                 <button class="clearButton" onclick="clearFile()">Temizle</button>
                 <button class="analyzButton" onclick="analyzeFile()">Analiz</button>
             </div>
         </section>
+        
         
         <section class="product section container" id="products">
             <h2 class="section__title-center">Sample Test <br> Results</h2>
@@ -297,69 +295,77 @@
 <script src="main.js"></script>
 
 <script>
-    const dropArea = document.querySelector(".drag-area");
-    const dragText = dropArea.querySelector("header");
-    const input = dropArea.querySelector("input[type='file']");
-    let uploadedFile;
+   document.addEventListener('dragover', dragOverHandler);
+document.addEventListener('drop', dropHandler);
 
-    function dragOverHandler(event) {
-        event.preventDefault();
-        dropArea.classList.add("active");
-        dragText.textContent = "Dosyayı Yüklemek için Bırakın";
+const dropArea = document.querySelector(".drag-area");
+const dragText = dropArea.querySelector("header");
+const input = dropArea.querySelector("input[type='file']");
+const aiButtons = document.getElementById("aiButtons");
+let uploadedFile;
+
+function dragOverHandler(event) {
+    event.preventDefault();
+    dropArea.classList.add("active");
+    dragText.textContent = "Dosyayı Yüklemek için Bırakın";
+}
+
+function dropHandler(event) {
+    event.preventDefault();
+    dropArea.classList.remove("active");
+    dragText.textContent = "Dosyayı Sürükleyip Bırakın";
+
+    uploadedFile = event.dataTransfer.files[0];
+    showFile(uploadedFile);
+    dropArea.style.display = 'none'; // Drag alanını gizle
+}
+
+input.addEventListener("change", function (event) {
+    uploadedFile = event.target.files[0];
+    showFile(uploadedFile);
+    dropArea.style.display = 'none'; // Drag alanını gizle
+});
+
+function showFile(file) {
+    const reader = new FileReader();
+    reader.onload = function(event) {
+        document.getElementById('previewImage').src = event.target.result;
+        document.getElementById('preview').style.display = 'block';
+        aiButtons.style.display = 'flex'; // Dosya yüklendiğinde butonları göster
+    };
+    reader.readAsDataURL(file);
+}
+
+function clearFile() {
+    uploadedFile = null;
+    document.getElementById('file').value = '';
+    document.getElementById('preview').style.display = 'none';
+    aiButtons.style.display = 'none'; // Temizle butonuna basıldığında butonları gizle
+    dropArea.style.display = 'flex'; // Drag alanını tekrar görünür yap
+}
+
+function analyzeFile() {
+    if (uploadedFile) {
+        const formData = new FormData();
+        formData.append('file', uploadedFile);
+
+        fetch('/upload', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log(data);
+            alert('Dosya başarıyla yüklendi ve analiz edildi.');
+        })
+        .catch(error => {
+            console.error(error);
+            alert('Dosya yüklenirken bir hata oluştu.');
+        });
+    } else {
+        alert('Lütfen bir dosya yükleyin.');
     }
-
-    function dropHandler(event) {
-        event.preventDefault();
-        dropArea.classList.remove("active");
-        dragText.textContent = "Dosyayı Sürükleyip Bırakın";
-
-        uploadedFile = event.dataTransfer.files[0];
-        showFile(uploadedFile);
-    }
-
-    input.addEventListener("change", function (event) {
-        uploadedFile = event.target.files[0];
-        showFile(uploadedFile);
-    });
-
-    function showFile(file) {
-        const reader = new FileReader();
-        reader.onload = function(event) {
-            document.getElementById('previewImage').src = event.target.result;
-            document.getElementById('preview').style.display = 'block';
-        };
-        reader.readAsDataURL(file);
-    }
-
-    function clearFile() {
-        uploadedFile = null;
-        document.getElementById('file').value = '';
-        document.getElementById('preview').style.display = 'none';
-    }
-
-    function analyzeFile() {
-        if (uploadedFile) {
-            const formData = new FormData();
-            formData.append('file', uploadedFile);
-
-            fetch('/upload', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log(data);
-                alert('Dosya başarıyla yüklendi ve analiz edildi.');
-            })
-            .catch(error => {
-                console.error(error);
-                alert('Dosya yüklenirken bir hata oluştu.');
-            });
-        } else {
-            alert('Lütfen bir dosya yükleyin.');
-        }
-    }
+}
 </script>
 </body>
-
 </html>
