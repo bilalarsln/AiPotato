@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Upload and Analysis</title>
+    <link rel="stylesheet" href="{{url_for('static', filename='style.css')}}">
+</head>
+<body>
+    <header class="header" id="header">
+        <!-- Navigation and other header elements -->
+    </header>
+
+    <main class="main">
+        <!-- Home section and other content sections -->
+        <section class="upload section container" id="upload">
+            <div class="upload__container">
+                <div class="drag-area" ondrop="upload_file(event)" ondragover="return false">
+                    <div class="icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                    <button onclick="file_browse()">Click to Upload or Drag File Here</button>
+                    <input type="file" name="file" id="file" hidden>
+                    <div id="preview"></div>
+                </div>
+                <button onclick="clearImage()">Temizle</button>
+                <button onclick="analyzeImage()">Analiz Et</button>
+                <div id="resultArea"></div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer and other HTML -->
+
+    <script>
+        const dropArea = document.querySelector(".drag-area"),
+        preview = document.getElementById("preview"),
+        resultArea = document.getElementById("resultArea"),
+        input = dropArea.querySelector("input");
+        let file; // this is a global variable and we'll use it inside multiple functions
+
+        function clearImage() {
+            preview.innerHTML = ''; // Clear the preview area
+            resultArea.innerHTML = ''; // Clear the results area
+        }
+
+        function analyzeImage() {
+            let imgSrc = preview.querySelector('img').src;
+            resultArea.innerHTML = 'Analiz yapılıyor...';
+            fetch('analyze.php', {
+                method: 'POST',
+                body: JSON.stringify({image: imgSrc}),
+                headers: {'Content-Type': 'application/json'}
+            })
+            .then(response => response.json())
+            .then(data => {
+                resultArea.innerHTML = 'Analiz sonucu: ' + JSON.stringify(data);
+            })
+            .catch(error => {
+                resultArea.innerHTML = 'Analiz hatası: ' + error.toString();
+            });
+        }
+
+        function showFile(){
+            let fileType = file.type;
+            let validExtensions = ["image/jpeg", "image/jpg", "image/png"];
+            if(validExtensions.includes(fileType)){
+                let fileReader = new FileReader();
+                fileReader.onload = ()=>{
+                    let fileURL = fileReader.result;
+                    let imgTag = `<img src="${fileURL}" alt="">`;
+                    preview.innerHTML = imgTag; // Show image in preview area
+                }
+                fileReader.readAsDataURL(file);
+            } else {
+                alert("This is not an Image File!");
+            }
+        }
+
+        // File upload event listeners and other related functions
+    </script>
+</body>
+</html>
