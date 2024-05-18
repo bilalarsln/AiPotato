@@ -135,11 +135,10 @@
             </div>
             <div class="aiButtons" id="aiButtons">
                 <button class="clearButton" onclick="clearFile()">Temizle</button>
-                <button class="analyzButton" onclick="analyzeFile()">Analiz</button>
+                <button class="analyzeButton" onclick="analyzeFile()">Analiz</button>
             </div>
         </section>
-        
-        
+
         <section class="product section container" id="products">
             <h2 class="section__title-center">Sample Test <br> Results</h2>
             <p class="product__description">We tested the result by sending potato photos to the server. All tests have
@@ -295,7 +294,7 @@
 <script src="main.js"></script>
 
 <script>
-   document.addEventListener('dragover', dragOverHandler);
+document.addEventListener('dragover', dragOverHandler);
 document.addEventListener('drop', dropHandler);
 
 const dropArea = document.querySelector(".drag-area");
@@ -355,8 +354,14 @@ function analyzeFile() {
         })
         .then(response => response.json())
         .then(data => {
-            console.log(data);
-            alert('Dosya başarıyla yüklendi ve analiz edildi.');
+            if (data.error) {
+                alert(data.error);
+            } else {
+                const resultElement = document.createElement('p');
+                resultElement.textContent = `Predicted: ${data.predicted_class_name}, Confidence: ${data.confidence}`;
+                document.getElementById('preview').appendChild(resultElement);
+                resultElement.style.color = 'white';
+            }
         })
         .catch(error => {
             console.error(error);

@@ -1,13 +1,14 @@
 import os
-from flask import Flask, redirect, request, render_template, url_for
+from flask import Flask, redirect, request, render_template, url_for, jsonify
 from werkzeug.utils import secure_filename
 from flask_cors import CORS
+from test import analyze_image  # test.py dosyasından analyze_image fonksiyonunu içe aktarma
 
 app = Flask(__name__)
 app.config['CORS_HEADERS'] = 'Content-Type'
 cors = CORS(app)
 
-UPLOAD_FOLDER = 'upload'
+UPLOAD_FOLDER = 'uploads'  # Dizin adı düzeltilmiş
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
@@ -24,20 +25,27 @@ def main():
 @app.route('/upload', methods=['POST'])
 def upload_file():
     if 'file' not in request.files:
-        return redirect(request.url)
+        return jsonify({'error': 'No file part'}), 400
     file = request.files['file']
     if file.filename == '':
-        return redirect(request.url)
+        return jsonify({'error': 'No selected file'}), 400
     if file and allowed_file(file.filename):
         filename = secure_filename(file.filename)
-        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-        return redirect(url_for('main'))
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(filepath)
+        
+        # Görüntüyü analiz et ve sonucu al
+        try:
+            predicted_class_name, confidence = analyze_image(filepath)
+            result = {
+                'predicted_class_name': predicted_class_name,
+                'confidence': confidence
+            }
+            return jsonify(result)
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
     else:
-        return 'Geçersiz dosya türü!'
-
-@app.route("/potato")
-def potato():
-    return "hello potato"
+        return jsonify({'error': 'Invalid file type'}), 400
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5002, debug=True, threaded=True)
