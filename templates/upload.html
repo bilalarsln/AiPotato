@@ -134,6 +134,8 @@
                 </div>
             </div>
             <div class="aiButtons" id="aiButtons">
+                <input type="checkbox" id="locationCheckbox" name="locationCheckbox">
+                <label for="locationCheckbox">Konumumu Kaydet</label><br>
                 <button class="clearButton" onclick="clearFile()">Temizle</button>
                 <button class="analyzeButton" onclick="analyzeFile()">Analiz</button>
             </div>
@@ -301,7 +303,10 @@ const dropArea = document.querySelector(".drag-area");
 const dragText = dropArea.querySelector("header");
 const input = dropArea.querySelector("input[type='file']");
 const aiButtons = document.getElementById("aiButtons");
+const locationCheckbox = document.getElementById("locationCheckbox");
 let uploadedFile;
+let userLatitude = null;
+let userLongitude = null;
 
 function dragOverHandler(event) {
     event.preventDefault();
@@ -344,32 +349,67 @@ function clearFile() {
 }
 
 function analyzeFile() {
+    // Önceki analiz sonuçlarını temizle
+    const existingResults = document.querySelectorAll('#preview p');
+    existingResults.forEach(result => result.remove());
+
     if (uploadedFile) {
         const formData = new FormData();
         formData.append('file', uploadedFile);
 
-        fetch('/upload', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.error) {
-                alert(data.error);
+        if (locationCheckbox.checked) {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    position => {
+                        userLatitude = position.coords.latitude;
+                        userLongitude = position.coords.longitude;
+
+                        // Konum bilgilerini formData'ya ekle
+                        formData.append('latitude', userLatitude);
+                        formData.append('longitude', userLongitude);
+
+                        // Dosya ve konum bilgilerini sunucuya gönder
+                        sendFile(formData);
+                    },
+                    error => {
+                        alert('Konum alınamadı: ' + error.message);
+                    }
+                );
             } else {
-                const resultElement = document.createElement('p');
-                resultElement.textContent = `Predicted: ${data.predicted_class_name}, Confidence: ${data.confidence}`;
-                document.getElementById('preview').appendChild(resultElement);
-                resultElement.style.color = 'white';
+                alert('Tarayıcınız konum servislerini desteklemiyor.');
             }
-        })
-        .catch(error => {
-            console.error(error);
-            alert('Dosya yüklenirken bir hata oluştu.');
-        });
+        } else {
+            // Konum bilgisi olmadan dosyayı gönder
+            sendFile(formData);
+        }
     } else {
         alert('Lütfen bir dosya yükleyin.');
     }
+}
+
+function sendFile(formData) {
+    fetch('/upload', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            alert(data.error);
+        } else {
+            const resultElement = document.createElement('p');
+            resultElement.textContent = `Predicted: ${data.predicted_class_name}, Confidence: ${data.confidence}`;
+            if (data.latitude && data.longitude) {
+                resultElement.textContent += `, Location: (${data.latitude}, ${data.longitude})`;
+            }
+            document.getElementById('preview').appendChild(resultElement);
+            resultElement.style.color = 'white';
+        }
+    })
+    .catch(error => {
+        console.error(error);
+        alert('Dosya yüklenirken bir hata oluştu.');
+    });
 }
 </script>
 </body>

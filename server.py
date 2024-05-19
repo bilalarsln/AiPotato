@@ -33,13 +33,19 @@ def upload_file():
         filename = secure_filename(file.filename)
         filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         file.save(filepath)
+
+        # Konum bilgilerini al
+        latitude = request.form.get('latitude')
+        longitude = request.form.get('longitude')
         
         # Görüntüyü analiz et ve sonucu al
         try:
             predicted_class_name, confidence = analyze_image(filepath)
             result = {
                 'predicted_class_name': predicted_class_name,
-                'confidence': confidence
+                'confidence': confidence,
+                'latitude': latitude,
+                'longitude': longitude
             }
             return jsonify(result)
         except Exception as e:
