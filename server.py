@@ -3,6 +3,7 @@ from flask import Flask, redirect, request, render_template, url_for, jsonify
 from werkzeug.utils import secure_filename
 from flask_cors import CORS
 from test import analyze_image  # test.py dosyasından analyze_image fonksiyonunu içe aktarma
+from flask_mysqldb import MySQL
 
 app = Flask(__name__)
 app.config['CORS_HEADERS'] = 'Content-Type'
@@ -11,6 +12,12 @@ cors = CORS(app)
 UPLOAD_FOLDER = 'uploads'  # Dizin adı düzeltilmiş
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['MYSQL_HOST'] = '127.0.0.1'
+app.config['MYSQL_USER'] = 'root'
+app.config['MYSQL_PASSWORD'] = ''
+app.config['MYSQL_DB'] = 'AIPotato'
+
+mysql = MySQL(app)
 
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
@@ -20,7 +27,11 @@ def allowed_file(filename):
 
 @app.route("/")
 def main():
-    return render_template("upload.html")
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT * FROM all_analysis")
+    data = cur.fetchall()
+    cur.close()
+    return render_template("upload.html", data=data)
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
