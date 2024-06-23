@@ -109,7 +109,7 @@
             <div class="steps__bg">
                 <div class="drag-area" id="drag-area" ondrop="dropHandler(event)" ondragover="dragOverHandler(event)">
                     <div class="icon"><i class="fas fa-cloud-upload-alt"></i></div>
-                    <header>Dosyayı Sürükleyip Bırakın veya Seçmek için Tıklayın</header>
+                    <header>Drag and Drop File or Click to Select</header>
                     <input type="file" name="file" id="file" onchange="file_browse(event)">
                 </div>
                 <div class="preview" id="preview">
@@ -135,9 +135,9 @@
             </div>
             <div class="aiButtons" id="aiButtons">
                 <input type="checkbox" id="locationCheckbox" name="locationCheckbox">
-                <label for="locationCheckbox">Konumumu Kaydet</label><br>
-                <button class="clearButton" onclick="clearFile()">Temizle</button>
-                <button class="analyzeButton" onclick="analyzeFile()">Analiz</button>
+                <label for="locationCheckbox">Save Location</label><br>
+                <button class="clearButton" onclick="clearFile()">Clear</button>
+                <button class="analyzeButton" onclick="analyzeFile()">Analyze</button>
             </div>
         </section>
 
@@ -241,6 +241,22 @@
             </div>
         </section>
 
+        <section class="product section container" id="pastAnalysis">
+            <h2 class="section__title-center">Your Past Analysis</h2>
+            <p class="product__description">You can find his previous analyzes here.</p>
+            <div class="product__container grid">
+                {% for item in data %}
+                <article class="product__card">
+                    <div class="product__circle"></div>
+                    <img src="{{ url_for('static', filename='assets/img/sample1.png') }}" alt="" class="product__img">
+                    <h3 class="product__title">Illness: {{ item[2] }}</h3> <!-- 2. sütun verisi -->
+                    <span class="product__price">Occur : {{ item[3] }}%</span> <!-- 3. sütun verisi -->
+                    <button class="button--flex product__button"><i class="fa fa-stethoscope"></i></button>
+                </article>
+                {% endfor %}
+            </div>
+        </section>
+
         <section class="contact section container" id="contact">
             <div class="contact__container grid">
                 <div class="contact__box">
@@ -311,13 +327,13 @@ let userLongitude = null;
 function dragOverHandler(event) {
     event.preventDefault();
     dropArea.classList.add("active");
-    dragText.textContent = "Dosyayı Yüklemek için Bırakın";
+    dragText.textContent = "Release to Upload File";
 }
 
 function dropHandler(event) {
     event.preventDefault();
     dropArea.classList.remove("active");
-    dragText.textContent = "Dosyayı Sürükleyip Bırakın";
+    dragText.textContent = "Drag and Drop File";
 
     uploadedFile = event.dataTransfer.files[0];
     showFile(uploadedFile);
