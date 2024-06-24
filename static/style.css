@@ -1168,19 +1168,19 @@ body.dark-theme {
     padding: 8px;
     color: white;
     border-radius: 12px;
-
+    margin: 5px;
 }
 .clearButton:hover{
     background-color: red;
     color: rgb(84, 81, 81);
 }
 
-.analyzButton{
+.analyzeButton{
     background-color: rgb(85, 175, 71);
     padding: 8px;
     color: white;
     border-radius: 12px;
-
+    margin: 5px;
 }
 .analyzButton:hover{
     background-color: rgb(15, 180, 6);
@@ -1204,4 +1204,6 @@ body.dark-theme {
 
 .aiButtons {
     display: none; /* Başlangıçta butonları gizle */
+    justify-content: space-around;
+    margin-top: 10px;
 }

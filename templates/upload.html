@@ -115,6 +115,14 @@
                 <div class="preview" id="preview">
                     <img id="previewImage" src="" alt="Preview">
                 </div>
+                <div class="row aiButtons" id="aiButtons">
+                
+                    <label class="locationCheckbox" style="margin-top: 12px;" for="locationCheckbox">Save Location
+                        <input type="checkbox" id="locationCheckbox" name="locationCheckbox">
+                    </label>
+                    <button class="clearButton " onclick="clearFile()">Clear</button>
+                    <button class="analyzeButton" onclick="analyzeFile()">Analyze</button>
+                </div>
                 <div class="steps__container grid">
                     <div class="steps__card">
                         <div class="steps__card-number">01</div>
@@ -133,12 +141,7 @@
                     </div>
                 </div>
             </div>
-            <div class="aiButtons" id="aiButtons">
-                <input type="checkbox" id="locationCheckbox" name="locationCheckbox">
-                <label for="locationCheckbox">Save Location</label><br>
-                <button class="clearButton" onclick="clearFile()">Clear</button>
-                <button class="analyzeButton" onclick="analyzeFile()">Analyze</button>
-            </div>
+            
         </section>
 
         <section class="product section container" id="products">
@@ -308,8 +311,8 @@
     <i class="ri-arrow-up-fill scrollup__icon"></i>
 </a>
 
-<script src="scrollreveal.min.js"></script>
-<script src="main.js"></script>
+<script src="{{url_for('static', filename='scrollreveal.min.js')}}"></script>
+<script src="{{url_for('static', filename='main.js')}}"></script>
 
 <script>
 document.addEventListener('dragover', dragOverHandler);
