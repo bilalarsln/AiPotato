@@ -33,6 +33,11 @@ def main():
     cur.close()
     return render_template("upload.html", data=data)
 
+@app.route("/login")
+def home():
+    return render_template("index.html")
+
+
 @app.route('/upload', methods=['POST'])
 def upload_file():
     if 'file' not in request.files:
