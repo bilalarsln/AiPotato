@@ -3,7 +3,7 @@ import numpy as np
 
 # Modelin yüklenmesi
 model = tf.keras.models.load_model("/Users/bilal/Desktop/potato/AiPotato/Potato-Disease_Classification.keras")
-#model = tf.keras.models.load_model("/Users/Ilknu/Downloads/AiPotato/Potato-Disease_Classification.keras")
+#model = tf.keras.models.load_model("/Users/Ilknu/Downloads/AiPotato-main/Potato-Disease_Classification.keras")
 
 def analyze_image(image_path):
     # Görüntünün yüklenmesi ve yeniden boyutlandırılması

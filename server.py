@@ -32,7 +32,7 @@ def main():
     cur.execute("SELECT * FROM all_analysis")
     data = cur.fetchall()
     cur.close()
-    return render_template("upload.html", data=data)
+    return render_template("upload.html", data=data,username=session['username'])
 
 @app.route("/login")
 def login():
@@ -57,7 +57,27 @@ def login_post():
             return redirect(url_for("main"))
         else:
             msg = "Incorrect username or password..."
-    return render_template("upload.html",msg=msg,username=session['username'])
+    return render_template("upload.html",msg=msg)
+
+@app.route('/register_post', methods=['GET','POST'])
+def register_post():
+    if request.method== 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        country = request.form['country']
+        city = request.form['city']
+        work = request.form['work']
+        mail = request.form['mail']
+        cur = mysql.connection.cursor() 
+        record = cur.execute(f"INSERT INTO user (username,country,city,work,mail,password) VALUES ('{username}','{country}','{city}','{work}','{mail}','{password}')")
+        mysql.connection.commit()
+        if record:
+            session['loggedin'] = True
+            session['username'] = username
+            return redirect(url_for("main"))
+        cur.close()
+        return redirect(url_for("main"))
+    return render_template("upload.html")
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
