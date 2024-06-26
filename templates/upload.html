@@ -37,10 +37,15 @@
                     <li class="nav__item">
                         <a href="#contact" class="nav__link">Contact Us</a>
                     </li>
-                    <li class="nav__item">
-                        <a href="/login" class="nav__link"><i class="fa-regular fa-user"></i></a>
-                    </li>
-                    
+                    {% if session.loggedin %}
+                        <li class="nav__item">
+                            <a href="/logout" class="nav__link">Logout</a>
+                        </li>
+                    {% else %}
+                        <li class="nav__item">
+                            <a href="/login" class="nav__link"><i class="fa-regular fa-user"></i></a>
+                        </li>
+                    {% endif %}
                 </ul>
                 <div class="nav__close" id="nav-close">
                     <i class="ri-close-line"></i>
@@ -57,7 +62,9 @@
 
     <main class="main">
         <section class="home" id="home">
-            <h3 class="username">hello {{username}}</h3>
+            {% if username %}
+    <h3 class="username">hello {{ username }}</h3>
+{% endif %}
             <div class="home__container container grid">
                 <img src="{{ url_for('static', filename='assets/img/home.png') }}" alt="" class="home__img">
                 <div class="home__data">
@@ -262,10 +269,9 @@
                 {% for item in data %}
                 <article class="product__card">
                     <div class="product__circle"></div>
-                    <!-- Fotoğraf verisi item[1] sütunundan çekiliyor -->
-                    <img src="{{ url_for('static', filename='assets/img/' + item[1]) }}" alt="Analysis Image" class="product__img">
-                    <h3 class="product__title">Illness: {{ item[2] }}</h3> <!-- 2. sütun verisi -->
-                    <span class="product__price">Occur : {{ item[3] }}%</span> <!-- 3. sütun verisi -->
+                    <img src="{{ url_for('static', filename='uploads/' + item[1]) }}" alt="Analysis Image" class="product__img">
+                    <h3 class="product__title">Illness: {{ item[2] }}</h3>
+                    <span class="product__price">Occur : {{ item[3] }}%</span>
                     <button class="button--flex product__button"><i class="fa fa-stethoscope"></i></button>
                 </article>
                 {% endfor %}
@@ -445,5 +451,18 @@ function sendFile(formData) {
 }
 </script>
 <script src="https://kit.fontawesome.com/978d53435b.js" crossorigin="anonymous"></script>
+<!--Start of Tawk.to Script-->
+<script type="text/javascript">
+var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+(function(){
+var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+s1.async=true;
+s1.src='https://embed.tawk.to/667c7f84eaf3bd8d4d14b164/1i1b547i6';
+s1.charset='UTF-8';
+s1.setAttribute('crossorigin','*');
+s0.parentNode.insertBefore(s1,s0);
+})();
+</script>
+<!--End of Tawk.to Script-->
 </body>
 </html>

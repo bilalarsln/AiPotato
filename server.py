@@ -1,5 +1,5 @@
 import os
-from flask import Flask, redirect, request, render_template, url_for, jsonify,session
+from flask import Flask, redirect, request, render_template, url_for, jsonify, session
 from werkzeug.utils import secure_filename
 from flask_cors import CORS
 from test import analyze_image  # test.py dosyasından analyze_image fonksiyonunu içe aktarma
@@ -32,7 +32,8 @@ def main():
     cur.execute("SELECT * FROM all_analysis")
     data = cur.fetchall()
     cur.close()
-    return render_template("upload.html", data=data,username=session['username'])
+    username = session.get('username', 'Guest')  # Kullanıcı adı yoksa 'Guest' kullan
+    return render_template("upload.html", data=data, username=username)
 
 @app.route("/login")
 def login():
@@ -42,42 +43,52 @@ def login():
 def register():
     return render_template("register.html")
 
-@app.route('/login_post', methods=['GET','POST'])
+@app.route('/login_post', methods=['GET', 'POST'])
 def login_post():
-    msg=''
-    if request.method== 'POST':
+    msg = ''
+    if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-        cur = mysql.connection.cursor() 
-        cur.execute('SELECT * FROM user WHERE username=%s AND password=%s',(username,password,))
+        cur = mysql.connection.cursor()
+        cur.execute('SELECT * FROM user WHERE username=%s AND password=%s', (username, password,))
         record = cur.fetchone()
         if record:
             session['loggedin'] = True
+            session['user_id'] = record[0]  # Kullanıcı ID'si
             session['username'] = record[1]
             return redirect(url_for("main"))
         else:
             msg = "Incorrect username or password..."
-    return render_template("upload.html",msg=msg)
+    return render_template("login.html", msg=msg)
 
-@app.route('/register_post', methods=['GET','POST'])
+@app.route('/logout')
+def logout():
+    session.pop('loggedin', None)
+    session.pop('user_id', None)
+    session.pop('username', None)
+    return redirect(url_for("main"))
+
+@app.route('/register_post', methods=['GET', 'POST'])
 def register_post():
-    if request.method== 'POST':
+    if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
         country = request.form['country']
         city = request.form['city']
         work = request.form['work']
         mail = request.form['mail']
-        cur = mysql.connection.cursor() 
-        record = cur.execute(f"INSERT INTO user (username,country,city,work,mail,password) VALUES ('{username}','{country}','{city}','{work}','{mail}','{password}')")
+        cur = mysql.connection.cursor()
+        record = cur.execute(f"INSERT INTO user (username, country, city, work, mail, password) VALUES (%s, %s, %s, %s, %s, %s)",
+                             (username, country, city, work, mail, password))
         mysql.connection.commit()
         if record:
             session['loggedin'] = True
+            session['user_id'] = cur.lastrowid  # Kullanıcı ID'sini alın
             session['username'] = username
             return redirect(url_for("main"))
         cur.close()
         return redirect(url_for("main"))
-    return render_template("upload.html")
+    return render_template("register.html")
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
@@ -104,6 +115,15 @@ def upload_file():
                 'latitude': latitude,
                 'longitude': longitude
             }
+
+            # Analiz sonucunu veritabanına kaydet
+            cur = mysql.connection.cursor()
+            analysis_user_id = session.get('user_id', 1)  # Kullanıcı ID'sini session'dan alın (varsayılan olarak 1)
+            cur.execute("INSERT INTO all_analysis (analysis_img, analysis_result, analysis_rate, analysis_user_id) VALUES (%s, %s, %s, %s)",
+                        (filename, predicted_class_name, confidence, analysis_user_id))
+            mysql.connection.commit()
+            cur.close()
+
             return jsonify(result)
         except Exception as e:
             return jsonify({'error': str(e)}), 500

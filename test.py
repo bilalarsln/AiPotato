@@ -15,6 +15,7 @@ def analyze_image(image_path):
     predictions = model.predict(img_array)
     predicted_class = np.argmax(predictions[0])
     confidence = np.max(predictions[0])
+    
 
     # Sınıf adının alınması
     class_names = ['early blight', 'healthy', 'late blight']  # Sınıf adlarını kendi veri setinize göre güncelleyin
