@@ -275,7 +275,7 @@
                 <div class="product__container grid">
                     {% for item in data %}
                     <article class="product__card">
-                        <div class="product__circle"></div>
+                        
                         <img src="{{ item[1] }}" alt="Analysis Image" class="product__img">
                         <h3 class="product__title">Illness: {{ item[2] }}</h3>
                         <span class="product__price">Occur : {{ item[3] }}%</span>
@@ -286,8 +286,10 @@
                 <p class="product__description">Please log in to see your past analysis.</p>
                 <a href="/login" class="button button--flex">Log In <i class="fa-regular fa-user"></i></a>
             {% endif %}
-            <button class="button button--flex" onclick="showNearbyDiseases()">Show Nearby Diseases</button>
-            <div id="nearbyDiseases" class="product__container grid"></div>
+            <center>
+            <button class="button button--flex" onclick="showNearbyDiseases()" >Show Nearby Diseases</button>
+            <div id="nearbyDiseases" style="text-align: center;" class="product__container grid"></div>
+        </center>
         </section>
         
         
