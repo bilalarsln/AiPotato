@@ -4,6 +4,7 @@ from werkzeug.utils import secure_filename
 from flask_cors import CORS
 from test import analyze_image  # test.py dosyasından analyze_image fonksiyonunu içe aktarma
 from flask_mysqldb import MySQL
+import base64
 
 app = Flask(__name__)
 app.config['CORS_HEADERS'] = 'Content-Type'
@@ -104,6 +105,12 @@ def upload_file():
         filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         file.save(filepath)
 
+        # Dosyayı base64 formatında kodlayın
+        with open(filepath, "rb") as image_file:
+            encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
+            # MIME türünü belirlemek için dosya uzantısını kullanın
+            mime_type = f"data:image/{file.filename.rsplit('.', 1)[1].lower()};base64,{encoded_string}"
+
         # Konum bilgilerini al
         latitude = request.form.get('latitude')
         longitude = request.form.get('longitude')
@@ -122,7 +129,7 @@ def upload_file():
             cur = mysql.connection.cursor()
             analysis_user_id = session.get('user_id', 0)  # Kullanıcı ID'sini session'dan alın (varsayılan olarak 0)
             cur.execute("INSERT INTO all_analysis (analysis_img, analysis_result, analysis_rate, analysis_user_id) VALUES (%s, %s, %s, %s)",
-                        (filename, predicted_class_name, confidence, analysis_user_id))
+                        (mime_type, predicted_class_name, confidence, analysis_user_id))
             mysql.connection.commit()
             cur.close()
 

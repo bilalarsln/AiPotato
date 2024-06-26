@@ -269,7 +269,7 @@
                 {% for item in data %}
                 <article class="product__card">
                     <div class="product__circle"></div>
-                    <img src="{{ url_for('static', filename='uploads/' + item[1]) }}" alt="Analysis Image" class="product__img">
+                    <img src="{{ item[1] }}" alt="Analysis Image" class="product__img">
                     <h3 class="product__title">Illness: {{ item[2] }}</h3>
                     <span class="product__price">Occur : {{ item[3] }}%</span>
                     <button class="button--flex product__button"><i class="fa fa-stethoscope"></i></button>
@@ -277,6 +277,8 @@
                 {% endfor %}
             </div>
         </section>
+        
+        
         
 
         <section class="contact section container" id="contact">
