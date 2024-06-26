@@ -5,6 +5,8 @@ from flask_cors import CORS
 from test import analyze_image  # test.py dosyasından analyze_image fonksiyonunu içe aktarma
 from flask_mysqldb import MySQL
 import base64
+from math import radians, sin, cos, sqrt, atan2
+
 
 app = Flask(__name__)
 app.config['CORS_HEADERS'] = 'Content-Type'
@@ -93,6 +95,44 @@ def register_post():
         return redirect(url_for("main"))
     return render_template("register.html")
 
+def calculate_distance(lat1, lon1, lat2, lon2):
+    # Dünya yarıçapı (km cinsinden)
+    R = 6371.0
+
+    lat1, lon1 = radians(lat1), radians(lon1)
+    lat2, lon2 = radians(lat2), radians(lon2)
+
+    dlon = lon2 - lon1
+    dlat = lat2 - lat1
+
+    a = sin(dlat / 2)**2 + cos(lat1) * cos(lat2) * sin(dlon / 2)**2
+    c = 2 * atan2(sqrt(a), sqrt(1 - a))
+
+    distance = R * c
+    return distance
+
+@app.route('/nearby_analyses', methods=['POST'])
+def nearby_analyses():
+    if not session.get('loggedin'):
+        return jsonify({'error': 'User not logged in'}), 401
+
+    latitude = float(request.form.get('latitude'))
+    longitude = float(request.form.get('longitude'))
+
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT analysis_result, latitude, longitude FROM all_analysis WHERE analysis_user_id != %s AND (analysis_result = 'early blight' OR analysis_result = 'late blight')", [session['user_id']])
+    data = cur.fetchall()
+    cur.close()
+
+    nearby_diseases = []
+    for row in data:
+        disease, lat, lon = row[0], float(row[1]), float(row[2])
+        distance = calculate_distance(latitude, longitude, lat, lon)
+        if distance <= 10.0:  # 10 km içinde mi kontrol et
+            nearby_diseases.append(disease)
+
+    return jsonify({'nearby_diseases': nearby_diseases})
+
 @app.route('/upload', methods=['POST'])
 def upload_file():
     if 'file' not in request.files:
@@ -114,7 +154,7 @@ def upload_file():
         # Konum bilgilerini al
         latitude = request.form.get('latitude')
         longitude = request.form.get('longitude')
-        
+
         # Görüntüyü analiz et ve sonucu al
         try:
             predicted_class_name, confidence = analyze_image(filepath)
@@ -128,8 +168,10 @@ def upload_file():
             # Analiz sonucunu veritabanına kaydet
             cur = mysql.connection.cursor()
             analysis_user_id = session.get('user_id', 0)  # Kullanıcı ID'sini session'dan alın (varsayılan olarak 0)
-            cur.execute("INSERT INTO all_analysis (analysis_img, analysis_result, analysis_rate, analysis_user_id) VALUES (%s, %s, %s, %s)",
-                        (mime_type, predicted_class_name, confidence, analysis_user_id))
+            cur.execute(
+                "INSERT INTO all_analysis (analysis_img, analysis_result, analysis_rate, analysis_user_id, latitude, longitude) VALUES (%s, %s, %s, %s, %s, %s)",
+                (mime_type, predicted_class_name, confidence, analysis_user_id, float(latitude), float(longitude))
+            )
             mysql.connection.commit()
             cur.close()
 
