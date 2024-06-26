@@ -28,12 +28,14 @@ def allowed_file(filename):
 
 @app.route("/")
 def main():
+    user_id = session.get('user_id', 0)
     cur = mysql.connection.cursor()
-    cur.execute("SELECT * FROM all_analysis")
+    cur.execute("SELECT * FROM all_analysis WHERE analysis_user_id = %s", (user_id,))
     data = cur.fetchall()
     cur.close()
-    username = session.get('username', 'Guest')  # Kullanıcı adı yoksa 'Guest' kullan
+    username = session.get('username', 'Guest')
     return render_template("upload.html", data=data, username=username)
+
 
 @app.route("/login")
 def login():
@@ -118,7 +120,7 @@ def upload_file():
 
             # Analiz sonucunu veritabanına kaydet
             cur = mysql.connection.cursor()
-            analysis_user_id = session.get('user_id', 1)  # Kullanıcı ID'sini session'dan alın (varsayılan olarak 1)
+            analysis_user_id = session.get('user_id', 0)  # Kullanıcı ID'sini session'dan alın (varsayılan olarak 0)
             cur.execute("INSERT INTO all_analysis (analysis_img, analysis_result, analysis_rate, analysis_user_id) VALUES (%s, %s, %s, %s)",
                         (filename, predicted_class_name, confidence, analysis_user_id))
             mysql.connection.commit()
