@@ -63,7 +63,7 @@
     <main class="main">
         <section class="home" id="home">
             {% if username %}
-    <h3 class="username">hello {{ username }}</h3>
+    <h3 class="username">Hello {{ username }}</h3>
 {% endif %}
             <div class="home__container container grid">
                 <img src="{{ url_for('static', filename='assets/img/home.png') }}" alt="" class="home__img">
