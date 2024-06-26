@@ -116,7 +116,7 @@
 
         <section class="steps section container" id="steps">
             <div class="steps__bg">
-                <form action="{{url_for('upload_post')}}" method="post">
+            
                 <div class="drag-area" id="drag-area" ondrop="dropHandler(event)" ondragover="dragOverHandler(event)">
                     <div class="icon"><i class="fas fa-cloud-upload-alt"></i></div>
                     <header>Drag and Drop File or Click to Select</header>
@@ -133,7 +133,7 @@
                     <button class="clearButton " onclick="clearFile()">Clear</button>
                     <button class="analyzeButton" onclick="analyzeFile()">Analyze</button>
                 </div>
-            </form>
+            
                 <div class="steps__container grid">
                     <div class="steps__card">
                         <div class="steps__card-number">01</div>
