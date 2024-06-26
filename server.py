@@ -29,13 +29,13 @@ def allowed_file(filename):
 
 @app.route("/")
 def main():
-    user_id = session.get('user_id', 0)
     cur = mysql.connection.cursor()
-    cur.execute("SELECT * FROM all_analysis WHERE analysis_user_id = %s", (user_id,))
-    data = cur.fetchall()
+    data = []
+    if 'loggedin' in session and session['loggedin']:
+        cur.execute("SELECT * FROM all_analysis WHERE analysis_user_id = %s", [session['user_id']])
+        data = cur.fetchall()
     cur.close()
-    username = session.get('username', 'Guest')
-    return render_template("upload.html", data=data, username=username)
+    return render_template("upload.html", data=data, username=session.get('username', 'guest'), loggedin=session.get('loggedin', False))
 
 
 @app.route("/login")
