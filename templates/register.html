@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <link rel='stylesheet' href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css'>
+  <link rel="stylesheet" href="{{url_for('static', filename='login_style.css')}}">
+  <link rel="stylesheet" href="{{url_for('static', filename='style.css')}}">
+  <title>AI Potato | Register</title>
+  <script>
+    const countries = {
+      "Türkiye": {
+        "1": "Adana", "2": "Adıyaman", "3": "Afyonkarahisar", "4": "Ağrı", "5": "Amasya", 
+        "6": "Ankara", "7": "Antalya", "8": "Ardahan", "9": "Artvin", "10": "Aydın", 
+        "11": "Balıkesir", "12": "Bartın", "13": "Batman", "14": "Bayburt", "15": "Bilecik", 
+        "16": "Bingöl", "17": "Bitlis", "18": "Bolu", "19": "Burdur", "20": "Bursa", 
+        "21": "Çanakkale", "22": "Çankırı", "23": "Çorum", "24": "Denizli", "25": "Diyarbakır", 
+        "26": "Düzce", "27": "Edirne", "28": "Elazığ", "29": "Erzincan", "30": "Erzurum", 
+        "31": "Eskişehir", "32": "Gaziantep", "33": "Giresun", "34": "Gümüşhane", "35": "Hakkâri", 
+        "36": "Hatay", "37": "Iğdır", "38": "Isparta", "39": "İstanbul", "40": "İzmir", 
+        "41": "Kahramanmaraş", "42": "Karabük", "43": "Karaman", "44": "Kars", 
+        "45": "Kastamonu", "46": "Kayseri", "47": "Kilis", "48": "Kırıkkale", "49": "Kırklareli", 
+        "50": "Kırşehir", "51": "Kocaeli", "52": "Konya", "53": "Kütahya", "54": "Malatya", 
+        "55": "Manisa", "56": "Mardin", "57": "Mersin", "58": "Muğla", "59": "Muş", 
+        "60": "Nevşehir", "61": "Niğde", "62": "Ordu", "63": "Osmaniye", "64": "Rize", 
+        "65": "Sakarya", "66": "Samsun", "67": "Şanlıurfa", "68": "Siirt", "69": "Sinop", 
+        "70": "Sivas", "71": "Şırnak", "72": "Tekirdağ", "73": "Tokat", "74": "Trabzon", 
+        "75": "Tunceli", "76": "Uşak", "77": "Van", "78": "Yalova", "79": "Yozgat", 
+        "80": "Zonguldak"
+      },
+      "Almanya": ["Berlin", "Hamburg", "Münih"],
+      "ABD": ["New York", "Los Angeles", "Chicago"]
+    };
+
+    function updateCities() {
+      const countrySelect = document.getElementById('country');
+      const citySelect = document.getElementById('city');
+      const selectedCountry = countrySelect.value;
+
+      // Şehir seçeneklerini temizle
+      citySelect.innerHTML = '';
+
+      // Seçilen ülkeye ait şehirleri ekle
+      const cities = countries[selectedCountry];
+      Object.keys(cities).forEach((code) => {
+        const option = document.createElement('option');
+        option.value = code;
+        option.textContent = cities[code];
+        citySelect.appendChild(option);
+      });
+    }
+  </script>
+</head>
+
+<body>
+  <div class="wrapper">
+    <div class="login_box">
+      <div class="login-header">
+        <span>Register</span>
+      </div>
+      <form action="{{url_for('login_post')}}" method="post">
+        <div class="input_box">
+          <input type="text" name="username" id="user" class="input-field" required>
+          <label for="user" class="label">Username</label>
+          <i class="bx bx-user icon"></i>
+        </div>
+
+        <div class="input_box">
+          <select name="country" id="country" onchange="updateCities()" class="input-field" required>
+            <option value="">Country</option>
+            <option value="Türkiye">Türkiye</option>
+            <option value="Almanya">Almanya</option>
+            <option value="ABD">ABD</option>
+          </select>
+        </div>
+
+        <div class="input_box">
+          <select name="city" id="city" class="input-field" required>
+            <option value="">City</option>
+          </select>
+        </div>
+
+        <div class="input_box">
+          <input type="text" name="work" id="work" class="input-field" required>
+          <label for="work" class="label">Work</label>
+          <i class="bx bx-user icon"></i>
+        </div>
+
+        <div class="input_box">
+          <input type="email" name="mail" id="mail" class="input-field" required>
+          <label for="mail" class="label">Mail Address</label>
+          <i class="bx bx-user icon"></i>
+        </div>
+
+        <div class="input_box">
+          <input type="password" name="password" id="pass" class="input-field" required>
+          <label for="pass" class="label">Password</label>
+          <i class="bx bx-lock-alt icon"></i>
+        </div>
+
+        <div class="input_box">
+          <input type="submit" name="submit" class="input-submit" value="Login">
+        </div>
+      </form>
+      <div class="register">
+        <span>Do you have an account? <a href="/login">Login</a></span>
+      </div>
+      <div class="register">
+        <span><a href="/">Continue without becoming a member</a></span>
+      </div>
+  
+    </div>
+  </div>
+</body>
+
+</html>

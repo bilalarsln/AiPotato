@@ -1,5 +1,5 @@
 import os
-from flask import Flask, redirect, request, render_template, url_for, jsonify
+from flask import Flask, redirect, request, render_template, url_for, jsonify,session
 from werkzeug.utils import secure_filename
 from flask_cors import CORS
 from test import analyze_image  # test.py dosyasından analyze_image fonksiyonunu içe aktarma
@@ -7,6 +7,7 @@ from flask_mysqldb import MySQL
 
 app = Flask(__name__)
 app.config['CORS_HEADERS'] = 'Content-Type'
+app.secret_key = 'my_secret_key'  # secret key tanımlandı
 cors = CORS(app)
 
 UPLOAD_FOLDER = 'uploads'  # Dizin adı düzeltilmiş
@@ -34,9 +35,29 @@ def main():
     return render_template("upload.html", data=data)
 
 @app.route("/login")
-def home():
-    return render_template("index.html")
+def login():
+    return render_template("login.html")
 
+@app.route("/register")
+def register():
+    return render_template("register.html")
+
+@app.route('/login_post', methods=['GET','POST'])
+def login_post():
+    msg=''
+    if request.method== 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        cur = mysql.connection.cursor() 
+        cur.execute('SELECT * FROM user WHERE username=%s AND password=%s',(username,password,))
+        record = cur.fetchone()
+        if record:
+            session['loggedin'] = True
+            session['username'] = record[1]
+            return redirect(url_for("main"))
+        else:
+            msg = "Incorrect username or password..."
+    return render_template("upload.html",msg=msg,username=session['username'])
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
