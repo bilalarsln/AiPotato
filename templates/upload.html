@@ -148,26 +148,27 @@
                 <div class="steps__container grid">
                     <div class="steps__card">
                         <div class="steps__card-number">01</div>
-                        <h3 class="steps__card-title">Choose Plant</h3>
-                        <p class="steps__card-description">Select Photo of Potato.</p>
+                        <h3 class="steps__card-title">Take Photo</h3>
+                        <p class="steps__card-description">Take a photo showing a single leaf on a potato plant.</p>
                     </div>
                     <div class="steps__card">
                         <div class="steps__card-number">02</div>
-                        <h3 class="steps__card-title">Place an order</h3>
-                        <p class="steps__card-description">Once your order is set, we move to the next step which is the
-                            shipping.</p>
+                        <h3 class="steps__card-title">Upload Photo</h3>
+                        <p class="steps__card-description">To upload the photo you took, select it from the file or drag and drop it.</p>
                     </div>
                     <div class="steps__card">
                         <div class="steps__card-number">03</div>
-                        <h3 class="steps__card-title">Get plants delivered</h3>
-                        <p class="steps__card-description">Our delivery process is easy, you receive the plant direct to
-                            your door.</p>
+                        <h3 class="steps__card-title">See Result</h3>
+                        <p class="steps__card-description">Press the analysis button and see the result. Remember that the result is <b> not definitive.</b></p>
                     </div>
                 </div>
             </div>
 
         </section>
-
+        <center>
+            <button class="button button--flex" onclick="showNearbyDiseases()" >Show Nearby Diseases</button>
+            <div id="nearbyDiseases" style="text-align: center;" class="product__container grid"></div>
+        </center>
         <section class="product section container" id="products">
             <h2 class="section__title-center">Sample Test <br> Results</h2>
             <p class="product__description">We tested the result by sending potato photos to the server. All tests have
@@ -284,12 +285,11 @@
                 </div>
             {% else %}
                 <p class="product__description">Please log in to see your past analysis.</p>
-                <a href="/login" class="button button--flex">Log In <i class="fa-regular fa-user"></i></a>
+                <center>
+                <a href="/login" style="margin: 20px;" class="button button--flex">Log In <i class="fa-regular fa-user"></i></a>
+            </center>
             {% endif %}
-            <center>
-            <button class="button button--flex" onclick="showNearbyDiseases()" >Show Nearby Diseases</button>
-            <div id="nearbyDiseases" style="text-align: center;" class="product__container grid"></div>
-        </center>
+            
         </section>
         
         
