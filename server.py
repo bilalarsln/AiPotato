@@ -6,7 +6,7 @@ from test import analyze_image  # test.py dosyasından analyze_image fonksiyonun
 from flask_mysqldb import MySQL
 import base64
 from math import radians, sin, cos, sqrt, atan2
-
+from datetime import datetime
 
 app = Flask(__name__)
 app.config['CORS_HEADERS'] = 'Content-Type'
@@ -29,15 +29,28 @@ if not os.path.exists(UPLOAD_FOLDER):
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+from datetime import datetime, timedelta
+
 @app.route("/")
 def main():
     cur = mysql.connection.cursor()
     data = []
     if 'loggedin' in session and session['loggedin']:
-        cur.execute("SELECT * FROM all_analysis WHERE analysis_user_id = %s", [session['user_id']])
+        cur.execute("SELECT analysis_img, analysis_result, analysis_rate, analysis_date FROM all_analysis WHERE analysis_user_id = %s", [session['user_id']])
         data = cur.fetchall()
     cur.close()
-    return render_template("upload.html", data=data, username=session.get('username', 'guest'), loggedin=session.get('loggedin', False))
+    
+    # Geçmiş analizler için tarih ve süre hesaplamaları
+    formatted_data = []
+    now = datetime.now()
+    for row in data:
+        analysis_date = row[3]
+        time_diff = now - analysis_date
+        days = time_diff.days
+        hours = time_diff.seconds // 3600
+        formatted_data.append((row[0], row[1], row[2], analysis_date, f"{days} days, {hours} hours ago"))
+
+    return render_template("upload.html", data=formatted_data, username=session.get('username', 'guest'), loggedin=session.get('loggedin', False))
 
 
 @app.route("/login")
@@ -120,16 +133,20 @@ def nearby_analyses():
     longitude = float(request.form.get('longitude'))
 
     cur = mysql.connection.cursor()
-    cur.execute("SELECT analysis_result, latitude, longitude FROM all_analysis WHERE analysis_user_id != %s AND (analysis_result = 'early blight' OR analysis_result = 'late blight')", [session['user_id']])
+    cur.execute("SELECT analysis_result, latitude, longitude, analysis_date FROM all_analysis WHERE analysis_user_id != %s AND (analysis_result = 'early blight' OR analysis_result = 'late blight')", [session['user_id']])
     data = cur.fetchall()
     cur.close()
 
     nearby_diseases = []
+    now = datetime.now()
     for row in data:
-        disease, lat, lon = row[0], float(row[1]), float(row[2])
-        distance = calculate_distance(latitude, longitude, lat, lon)
+        disease, lat, lon, analysis_date = row
+        distance = calculate_distance(latitude, longitude, float(lat), float(lon))
         if distance <= 10.0:  # 10 km içinde mi kontrol et
-            nearby_diseases.append(disease)
+            time_diff = now - analysis_date
+            days = time_diff.days
+            hours = time_diff.seconds // 3600
+            nearby_diseases.append(f"{disease} ({days} days, {hours} hours ago)")
 
     return jsonify({'nearby_diseases': nearby_diseases})
 
@@ -168,9 +185,11 @@ def upload_file():
             # Analiz sonucunu veritabanına kaydet
             cur = mysql.connection.cursor()
             analysis_user_id = session.get('user_id', 0)  # Kullanıcı ID'sini session'dan alın (varsayılan olarak 0)
+            analysis_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')  # Mevcut tarih ve saati al
+
             cur.execute(
-                "INSERT INTO all_analysis (analysis_img, analysis_result, analysis_rate, analysis_user_id, latitude, longitude) VALUES (%s, %s, %s, %s, %s, %s)",
-                (mime_type, predicted_class_name, confidence, analysis_user_id, float(latitude), float(longitude))
+                "INSERT INTO all_analysis (analysis_img, analysis_result, analysis_rate, analysis_user_id, latitude, longitude, analysis_date) VALUES (%s, %s, %s, %s, %s, %s, %s)",
+                (mime_type, predicted_class_name, confidence, analysis_user_id, float(latitude), float(longitude), analysis_date)
             )
             mysql.connection.commit()
             cur.close()
