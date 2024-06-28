@@ -503,12 +503,18 @@ body.dark-theme {
     position: absolute;
     right: 0;
     bottom: 0;
-    background-color: var(--first-color);
     color: #FFF;
     padding: .25rem;
     border-radius: .35rem;
     font-size: 1.15rem
 }
+.illness{
+    background-color: red;
+}
+.healthy{
+    background-color: green;
+}
+
 
 .product__button:hover {
     background-color: var(--first-color-alt)
